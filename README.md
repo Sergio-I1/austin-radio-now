@@ -4,6 +4,14 @@ A live board showing what's playing on Austin and San Marcos FM radio (88.7 to 1
 
 It runs for free on Cloudflare Workers, so you can open it from your phone anywhere. No laptop has to stay on.
 
+## Two pages
+
+- **`/` - Radio near me.** Type a city, ZIP or address, or tap **Use my location**. It finds every FM tower near you (from the FCC's station database), estimates how well you can hear each one, and shows what's playing with the song's genre (Pop, Country, Hip-Hop/Rap...). Tap a genre to filter.
+  - **Map tab** shows the towers, colored by how strong they are where you are.
+  - **Advanced: signal zones** draws rings for a station: strong, good, weak, fading, and gone. It can also show where the same frequency turns into a different station, and **Follow me while driving** updates everything as you move.
+  - The rings are estimates from each tower's power and antenna height (fitted to the FCC's station-class distances). Hills, buildings, directional antennas and the weather aren't included.
+- **`/austin` - Austin live board + song log.** The fixed Austin / San Marcos station list below, checked every minute, with a downloadable log.
+
 Built with help from Claude (Anthropic's AI assistant).
 
 ## Stations
@@ -33,7 +41,7 @@ To add or remove a station, edit the `STATIONS` list at the top of `src/worker.j
 - **The page** (`/`) shows the live board and refreshes itself every 30 seconds. The **Log** tab shows recent changes and lets you filter by station.
 - `/log.csv` downloads the log as a spreadsheet, using Austin time. The log keeps the last 30 days.
 
-Where the song info comes from, tried in this order:
+Where the song info comes from, tried in this order (song genres come from Apple's public iTunes search, and station locations from the FCC FM Query):
 1. **iHeartRadio's live data**, for Kiss FM, KVET and KASE. It's exact and knows when an ad break is on.
 2. **The "now playing" tag inside the station's audio stream**, for KUTX.
 3. **TuneIn's station directory**, which lists the current song for most stations. Here "AD / TALK" means no song is listed right now, so it's a close guess.
@@ -42,7 +50,9 @@ These are public but unofficial sources, so a station may show **NO DATA** if on
 
 ## Put it online (one time, about 10 minutes)
 
-### Option A: no installs, in the Cloudflare website
+### Option A: no installs, in the Cloudflare website (Austin board only)
+The code is now split into several files, so this paste-in option only works for the older single-file version. Use Option C instead.
+
 1. Make a free account at **dash.cloudflare.com**.
 2. Go to **Workers & Pages**, then **Create**, and start from the "Hello World" Worker. Name it `austin-radio-now` and deploy it.
 3. Open the Worker, click **Edit code**, replace everything with the contents of `src/worker.js`, and **Deploy**.
