@@ -14,7 +14,8 @@
 // every change to a D1 database (binding: DB).
 
 import { KEEP_DAYS, STATIONS, runCheck, readLog, fmtTime, csvCell } from "./austin.js";
-import { geocode, reverse, nearby, playing, listen, proxyStream } from "./region.js";
+import { geocode, reverse, nearby, playing, listen, proxyStream, toStation } from "./region.js";
+import { debugStation } from "./nowplaying.js";
 import { PAGE } from "./page.js";
 
 const json = (d, status = 200) => new Response(JSON.stringify(d), { status, headers: { "content-type": "application/json", "cache-control": "no-store" } });
@@ -59,6 +60,12 @@ export default {
         case "/api/listen": {
           if (request.method !== "POST") return json({ error: "Use POST" }, 405);
           return json({ streams: await listen(await request.json()) });
+        }
+        case "/debug": {
+          // e.g. /debug?call=KKMJ-FM&freq=95.5&city=Austin  - shows what each source says
+          const q = Object.fromEntries(url.searchParams);
+          const a = STATIONS.find((x) => x.freq === q.freq);
+          return new Response(JSON.stringify(await debugStation(toStation({ ...(a || {}), ...q })), null, 2), { headers: { "content-type": "application/json" } });
         }
         case "/api/stream": return proxyStream(url.searchParams.get("u") || "", request);
         default: return new Response("Not found", { status: 404 });

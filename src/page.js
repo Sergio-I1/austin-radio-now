@@ -11,12 +11,25 @@ export const PAGE = `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
 body{padding-bottom:104px}
 .title{background:var(--xl);color:#fff;padding:10px 12px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
 .title b{font-size:17px}.title span{font-size:13px;opacity:.9}
-.tools{background:var(--head);border-bottom:1px solid var(--grid);padding:8px 10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-.tools input[type=search],.tools select{font:inherit;font-size:16px;height:40px;padding:0 10px;border:1px solid #c8c8c8;border-radius:4px;background:#fff;color:var(--ink)}
+.tools{background:var(--head);border-bottom:1px solid var(--grid);padding:6px 8px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.list{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:6px;padding:8px}
+.b{display:grid;grid-template-columns:50px minmax(0,1fr) auto;align-items:center;gap:8px;padding:6px 8px 6px 10px;border:1px solid var(--grid);border-left:4px solid var(--s0);border-radius:10px;background:#fff;min-height:52px;cursor:pointer}
+.b.SONG{border-left-color:var(--songT)}.b.AD{border-left-color:#e07b2e}.b.NO{border-left-color:#c9c9c9}
+.b.on{background:var(--sel);border-color:#9cc9ad}.b.far{opacity:.55}
+.b .f{font-weight:800;font-size:17px;line-height:1.05;font-variant-numeric:tabular-nums}.b .f small{display:block;font-weight:500;font-size:10.5px;color:var(--mute);letter-spacing:.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.b .m{overflow:hidden}.b .t{font-weight:650;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.b .a{font-size:12.5px;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.b .r{display:flex;align-items:center;gap:6px}
+.gtag{font-size:11px;padding:1px 7px;border-radius:99px;background:#eef3ef;color:var(--xl2);white-space:nowrap;max-width:84px;overflow:hidden;text-overflow:ellipsis}
+.b .play{width:36px;height:36px;border-radius:50%}
+.b.playing .play{background:var(--xl);color:#fff;border-color:var(--xl)}
+.sec{grid-column:1/-1;font-size:12px;color:var(--mute);padding:6px 2px 0}
+.msg{grid-column:1/-1;padding:14px;color:var(--mute)}
+.tools input[type=search],.tools select{font:inherit;font-size:16px;height:36px;padding:0 10px;border:1px solid #c8c8c8;border-radius:4px;background:#fff;color:var(--ink)}
 .tools input[type=search]{flex:1 1 180px}
-button{font:inherit;height:40px;padding:0 12px;border:1px solid #c8c8c8;border-radius:4px;background:#fff;color:var(--ink);cursor:pointer}
+button{font:inherit;height:36px;padding:0 12px;border:1px solid #c8c8c8;border-radius:4px;background:#fff;color:var(--ink);cursor:pointer}
 button.go{background:var(--xl);border-color:var(--xl);color:#fff;font-weight:600}
-.tog{display:inline-flex;align-items:center;gap:6px;height:40px;padding:0 10px;border:1px solid #c8c8c8;border-radius:4px;background:#fff;font-size:13px;cursor:pointer}
+.tog{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 10px;border:1px solid #c8c8c8;border-radius:4px;background:#fff;font-size:13px;cursor:pointer}
 .tog input{width:18px;height:18px;accent-color:var(--xl);margin:0}
 .fx{display:flex;align-items:center;border-bottom:1px solid var(--grid);font-size:13px;min-height:32px}
 .fx i{font-style:italic;font-family:Georgia,serif;color:var(--mute);padding:0 10px;border-right:1px solid var(--grid);align-self:stretch;display:flex;align-items:center}
@@ -60,18 +73,13 @@ a{color:var(--xl)}
 <input type="search" id="q" placeholder="City, ZIP or address" autocomplete="off" enterkeyhint="search">
 <button class="go" type="submit">Find</button><button type="button" id="loc">Use my location</button>
 <label class="tog"><input type="checkbox" id="musicOnly"> Music only</label>
-<label class="tog"><input type="checkbox" id="showFar"> Far stations</label>
+<label class="tog"><input type="checkbox" id="showFar"> Weak & far</label>
 <select id="genre" aria-label="Genre"><option value="">All genres</option></select>
 <span class="muted" id="count"></span>
 </form>
-<div class="fx"><i>fx</i><div id="fx">Tap a row to select it. Tap ▶ to listen.</div></div>
-
 <section class="sheet show" id="sStations">
-<div class="wrap"><table><thead>
-<tr class="letters"><th class="rn"></th><th class="pl">A</th><th class="fm">B</th><th>C</th><th>D</th><th>E</th><th>F</th><th>G</th><th>H</th><th>I</th><th>J</th><th>K</th></tr>
-<tr class="names"><th class="rn"></th><th class="pl">Listen</th><th class="fm">FM</th><th>Station</th><th>On air</th><th>Song</th><th>Artist</th><th>Genre</th><th>Signal here</th><th>Miles</th><th>City</th><th>Type</th></tr>
-</thead><tbody id="rows"><tr class="empty"><td class="rn">1</td><td colspan="11">Loading stations…</td></tr></tbody></table></div>
-<p class="note">Signal is an estimate from each tower's power and height in FCC records; hills, buildings and weather change it. FM reception stays about the same day and night. Song info comes from iHeartRadio, the stations' own streams and TuneIn; genres come from Apple's music catalog.</p>
+<div class="list" id="rows"><div class="msg">Loading stations…</div></div>
+<p class="note">Green edge = song playing, orange = ad / DJ / news, gray = no info. Signal bars are an estimate from each tower's power and height in FCC records; hills, buildings and weather change it. Song info comes from iHeartRadio, the stations' own streams and TuneIn; genres from Apple's music catalog. Something look wrong? Open /debug?freq=95.5 (any frequency) and send a screenshot.</p>
 </section>
 
 <section class="sheet" id="sMap">
@@ -127,7 +135,7 @@ async function api(path,body){const r=await fetch(path,body?{method:"POST",heade
 function visible(){
   const far=$("showFar").checked,mo=$("musicOnly").checked,g=$("genre").value;
   return stations.filter(s=>{const n=np[key(s)];
-    if(!far&&s.sig.bars===0)return false;
+    if(!far&&s.sig.bars===0&&s.sig.r>2.3)return false;
     if(mo&&n?.status!=="SONG")return false;
     if(g&&n?.genre!==g)return false;return true});
 }
@@ -135,40 +143,41 @@ function render(){
   if(!here)return;
   const gs=[...new Set(Object.values(np).map(n=>n.genre).filter(Boolean))].sort(),cur=$("genre").value;
   $("genre").innerHTML='<option value="">All genres</option>'+gs.map(g=>'<option'+(g===cur?" selected":"")+'>'+esc(g)+'</option>').join("");
-  const list=visible();
-  $("count").textContent=list.length+" of "+stations.filter(s=>$("showFar").checked||s.sig.bars>0).length+" shown";
-  $("rows").innerHTML=list.length?list.map((s,i)=>row(s,i+1)).join(""):'<tr class="empty"><td class="rn">1</td><td colspan="11">'+($("musicOnly").checked?"No music found right now. Turn off \\"Music only\\" to see everything.":"No stations match.")+'</td></tr>';
+  const list=visible(),hear=list.filter(s=>s.sig.bars>0),far=list.filter(s=>s.sig.bars===0);
+  $("count").textContent=list.length+" shown";
+  $("rows").innerHTML=list.length?hear.map(bubble).join("")+(far.length?'<div class="sec">Probably too far to hear</div>'+far.map(bubble).join(""):""):
+    '<div class="msg">'+($("musicOnly").checked?"No music found right now. Turn off “Music only” to see everything.":"No stations match.")+'</div>';
 }
-function row(s,i){
-  const n=np[key(s)],g=s.sig,k=key(s);
-  const bars='<span class="bars">'+[1,2,3,4].map(b=>'<i style="background:'+(b<=g.bars?"var("+g.c+")":"")+'"></i>').join("")+'</span>';
+function bubble(s){
+  const n=np[key(s)],g=s.sig,k=key(s),c=n?cls(n.status):"NO";
+  const bars='<span class="bars" title="'+esc(g.label)+'">'+[1,2,3,4].map(b=>'<i style="background:'+(b<=g.bars?"var("+g.c+")":"")+'"></i>').join("")+'</span>';
   const name=n?.stationName||s.call;
-  const st=n?'<td class="st '+cls(n.status)+'">'+esc(n.status)+'</td>':'<td class="muted">…</td>';
-  const song=n?(n.status==="SONG"?esc(n.title):'<span class="muted">'+esc(n.note||[n.artist,n.title].filter(Boolean).join(" – "))+'</span>'):"";
-  return '<tr data-k="'+esc(k)+'" class="'+(sel&&key(sel)===k?"on ":"")+(playingKey===k?"playing":"")+'"><td class="rn">'+i+'</td>'+
-    '<td class="pl"><button class="play" data-play="'+esc(k)+'" aria-label="Listen to '+esc(s.freq)+'">'+(playingKey===k?"■":"▶")+'</button></td>'+
-    '<td class="fm num">'+esc(s.freq)+'</td><td>'+esc(name)+(name!==s.call?' <span class="muted">'+esc(s.call)+'</span>':'')+'</td>'+st+
-    '<td class="song">'+song+'</td><td class="art">'+(n?.status==="SONG"?esc(n.artist):"")+'</td><td>'+esc(n?.genre||"")+'</td>'+
-    '<td>'+bars+esc(g.label)+(s.blockedBy?' <span class="muted">(blocked by '+esc(s.blockedBy.call)+')</span>':'')+'</td>'+
-    '<td class="num">'+(g.d*MI).toFixed(0)+'</td><td>'+esc(s.city)+", "+esc(s.state)+'</td><td class="muted">'+esc(s.kind)+'</td></tr>';
+  let t,a;
+  if(!n){t='<span class="muted">Checking…</span>';a=esc(name)}
+  else if(n.status==="SONG"){t=esc(n.title);a=esc(n.artist)+' · <span title="'+esc(name)+'">'+esc(name)+'</span>'}
+  else{t='<span class="muted">'+(n.status==="NO DATA"?"No song info":"Ad / DJ / news")+'</span>';a=esc(name)}
+  return '<div class="b '+c+(sel&&key(sel)===k?" on":"")+(playingKey===k?" playing":"")+(g.bars===0?" far":"")+'" data-k="'+esc(k)+'">'+
+    '<div class="f">'+esc(s.freq)+'<small>'+esc(s.call)+'</small></div>'+
+    '<div class="m"><div class="t">'+t+'</div><div class="a">'+a+(s.blockedBy?' · blocked by '+esc(s.blockedBy.call):'')+'</div></div>'+
+    '<div class="r">'+(n?.genre?'<span class="gtag">'+esc(n.genre)+'</span>':'')+bars+
+    '<button class="play" data-play="'+esc(k)+'" aria-label="Listen to '+esc(s.freq)+'">'+(playingKey===k?"■":"▶")+'</button></div></div>';
 }
-function setFx(s){const n=np[key(s)];$("fx").textContent=s.freq+" "+(n?.stationName||s.call)+" · "+(n?(n.status==="SONG"?n.title+" — "+n.artist+(n.genre?" ("+n.genre+")":""):n.status+(n.note?": "+n.note:"")):"checking…")+" · "+s.sig.label+", "+(s.sig.d*MI).toFixed(0)+" mi"}
-
+function setFx(){}
 async function go(lat,lon,label){
   here={lat,lon};center={lat,lon};np={};sel=null;stations=[];
   $("where").textContent="Finding stations near "+(label||"you")+"…";
-  $("rows").innerHTML='<tr class="empty"><td class="rn">1</td><td colspan="11">Asking the FCC which towers are nearby…</td></tr>';
+  $("rows").innerHTML='<div class="msg">Asking the FCC which towers are nearby…</div>';
   try{
     stations=(await api("/api/nearby?lat="+lat+"&lon="+lon)).stations;compute();
     if(!label)label=(await api("/api/reverse?lat="+lat+"&lon="+lon)).label;
     $("where").textContent=stations.filter(s=>s.sig.bars>0).length+" stations you can hear near "+label;
     try{localStorage.setItem("rs-last",JSON.stringify({lat,lon,label}))}catch(e){}
     render();drawMap();loadPlaying();
-  }catch(e){$("rows").innerHTML='<tr class="empty"><td class="rn">1</td><td colspan="11">'+esc(e.message)+'</td></tr>';$("where").textContent="Something went wrong"}
+  }catch(e){$("rows").innerHTML='<div class="msg">'+esc(e.message)+'</div>';$("where").textContent="Something went wrong"}
 }
 async function loadPlaying(){
   clearTimeout(npTimer);
-  const want=stations.filter(s=>s.sig.bars>0&&!s.blockedBy).slice(0,42),b=[];
+  const want=stations.filter(s=>s.sig.r<=2.3&&!s.blockedBy).sort((a,b)=>a.sig.r-b.sig.r).slice(0,42),b=[];
   for(let i=0;i<want.length;i+=6)b.push(want.slice(i,i+6));
   await Promise.all(b.map(async g=>{try{const d=await api("/api/playing",g.map(info));for(const r of d)np[r.call+"|"+r.freq]=r;render();if(sel)setFx(sel)}catch(e){}}));
   npTimer=setTimeout(loadPlaying,60000);
@@ -245,7 +254,7 @@ function tab(id){document.querySelectorAll(".sheet").forEach(x=>x.classList.togg
   if(id==="sLog")loadLog();
   try{history.replaceState(null,"",id==="sLog"?"#log":id==="sMap"?"#map":"#")}catch(e){}}
 document.querySelector(".tabs").onclick=e=>{const b=e.target.closest("button");if(b)tab(b.dataset.s)};
-$("rows").onclick=e=>{const tr=e.target.closest("tr[data-k]");if(!tr)return;const s=stations.find(x=>key(x)===tr.dataset.k);if(!s)return;
+$("rows").onclick=e=>{const tr=e.target.closest(".b[data-k]");if(!tr)return;const s=stations.find(x=>key(x)===tr.dataset.k);if(!s)return;
   if(e.target.closest("[data-play]"))playStation(s);else select(s)};
 $("f").onsubmit=async e=>{e.preventDefault();const q=$("q").value.trim();if(!q)return;$("where").textContent="Finding "+q+"…";
   try{const p=await api("/api/geocode?q="+encodeURIComponent(q));go(p.lat,p.lon,p.label);if(map)map.setView([p.lat,p.lon],9)}catch(e){$("where").textContent=e.message}};

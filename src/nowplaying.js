@@ -238,3 +238,20 @@ export async function songGenre(artist, title) {
   } catch { return ""; }
   return store(k, g);
 }
+
+// For troubleshooting one station: what every source says, and its stream links
+export async function debugStation(st) {
+  const out = { station: st, sources: {} };
+  for (const fn of [iheartNow, streamNow, tuneinNow]) {
+    try { out.sources[fn.name] = (await fn(st)) || "no answer"; }
+    catch (e) { out.sources[fn.name] = "error: " + e.message; }
+  }
+  try { out.streams = await streamsFor(st); } catch (e) { out.streams = "error: " + e.message; }
+  for (const u of (Array.isArray(out.streams) ? out.streams : []).slice(0, 3)) {
+    try {
+      if (/streamtheworld\.com/i.test(u)) out.sources["triton " + u] = (await tritonNow(u, st)) || "no answer";
+      else out.sources["icy " + u] = (await icyRead(u)) || "no tag in stream";
+    } catch (e) { out.sources["stream " + u] = "error: " + e.message; }
+  }
+  return out;
+}
