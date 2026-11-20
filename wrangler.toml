@@ -6,10 +6,8 @@ compatibility_date = "2025-09-01"
 [triggers]
 crons = ["* * * * *"]
 
-# The song log (Cloudflare D1). Turned off until the database exists.
-# To turn it on: create a D1 database named radio-log, paste its ID below,
-# and remove the # from the four lines.
-# [[d1_databases]]
-# binding = "DB"
-# database_name = "radio-log"
-# database_id = "PASTE-YOUR-DATABASE-ID-HERE"
+# The song log (Cloudflare D1)
+[[d1_databases]]
+binding = "DB"
+database_name = "radio-log"
+database_id = "f10a65eb-22aa-4f1d-80ef-d2e50b5ae398"
