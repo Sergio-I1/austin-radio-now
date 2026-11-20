@@ -1,0 +1,15 @@
+name = "austin-radio-now"
+main = "src/worker.js"
+compatibility_date = "2025-09-01"
+
+# Check every station once a minute (and save changes to the log, once the database is connected)
+[triggers]
+crons = ["* * * * *"]
+
+# The song log (Cloudflare D1). Turned off until the database exists.
+# To turn it on: create a D1 database named radio-log, paste its ID below,
+# and remove the # from the four lines.
+# [[d1_databases]]
+# binding = "DB"
+# database_name = "radio-log"
+# database_id = "PASTE-YOUR-DATABASE-ID-HERE"
