@@ -2,19 +2,19 @@
 // tabs: Stations, Map and Austin log. __AUSTIN__ is filled in by the worker.
 export const PAGE = `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1"><title>Radio Near Me</title>
-<meta name="theme-color" content="#217346"><meta name="color-scheme" content="light">
+<meta name="theme-color" content="#ffffff"><meta name="color-scheme" content="light">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
 :root{color-scheme:light;--xl:#217346;--xl2:#185c37;--grid:#d4d4d4;--head:#f3f3f3;--ink:#1f1f1f;--mute:#616161;--sel:#e8f2ec;
 --song:#e2efda;--songT:#1e6b34;--ad:#fce4d6;--adT:#9c4a12;--no:#f2f2f2;--noT:#7a7a7a;--s4:#1e8a4c;--s3:#6aa632;--s2:#d9a400;--s1:#d0582a;--s0:#a6a6a6}
 *{box-sizing:border-box;min-width:0}html,body{margin:0;background:#fff;color:var(--ink);font:14px/1.4 "Segoe UI",system-ui,-apple-system,Roboto,sans-serif}
-body{padding-bottom:104px}
-.title{background:var(--xl);color:#fff;padding:10px 12px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
-.title b{font-size:17px}.title span{font-size:13px;opacity:.9}
-.tools{background:var(--head);border-bottom:1px solid var(--grid);padding:6px 8px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
-.list{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:8px;padding:10px;background:#eef1f4}
-.b{display:grid;grid-template-columns:64px minmax(0,1fr) auto;align-items:stretch;gap:10px;padding:6px;border-radius:14px;background:#fff;box-shadow:0 1px 2px rgba(16,24,40,.08),0 1px 6px rgba(16,24,40,.06);cursor:pointer;border:2px solid transparent;--g:#9aa3ad}
-.b.on{border-color:var(--g)}.b.far{opacity:.6}
+body{padding-bottom:84px}
+.title{padding:18px 14px 4px;max-width:1100px;margin:auto}
+.title b{display:block;font-size:28px;font-weight:800;letter-spacing:-.02em;line-height:1.1}.title span{display:block;font-size:13px;color:var(--mute);margin-top:4px}
+.tools{padding:8px 14px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;max-width:1100px;margin:auto}
+.list{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:8px;padding:6px 14px 10px;max-width:1100px;margin:auto}
+.b{border:1px solid #e6e8ec!important;display:grid;grid-template-columns:64px minmax(0,1fr) auto;align-items:stretch;gap:10px;padding:6px;border-radius:14px;background:#fff;box-shadow:0 1px 2px rgba(16,24,40,.08),0 1px 6px rgba(16,24,40,.06);cursor:pointer;border:2px solid transparent;--g:#9aa3ad}
+.b.on{border-color:var(--g)!important;box-shadow:0 0 0 2px var(--g)}.b.far{opacity:.6}
 .b .f{background:var(--g);color:#fff;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4px 2px;min-height:58px}
 .b .f b{font-size:21px;font-weight:800;line-height:1;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
 .b .f small{font-size:9.5px;opacity:.85;margin-top:3px;letter-spacing:.03em}
@@ -29,11 +29,11 @@ body{padding-bottom:104px}
 .b.playing .play{background:var(--g);color:#fff}
 .sec{grid-column:1/-1;font-size:12px;font-weight:600;color:var(--mute);padding:8px 2px 0}
 .msg{grid-column:1/-1;padding:14px;color:var(--mute)}
-.tools input[type=search],.tools select{font:inherit;font-size:16px;height:36px;padding:0 10px;border:1px solid #c8c8c8;border-radius:4px;background:#fff;color:var(--ink)}
+.tools input[type=search],.tools select{font:inherit;font-size:16px;height:42px;padding:0 14px;border:1px solid #dde1e6;border-radius:12px;background:#fff;color:var(--ink)}
 .tools input[type=search]{flex:1 1 180px}
-button{font:inherit;height:36px;padding:0 12px;border:1px solid #c8c8c8;border-radius:4px;background:#fff;color:var(--ink);cursor:pointer}
+button{font:inherit;height:42px;padding:0 14px;border:1px solid #dde1e6;border-radius:12px;background:#fff;color:var(--ink);cursor:pointer}
 button.go{background:var(--xl);border-color:var(--xl);color:#fff;font-weight:600}
-.tog{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 10px;border:1px solid #c8c8c8;border-radius:4px;background:#fff;font-size:13px;cursor:pointer}
+.tog{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 12px;border:1px solid #dde1e6;border-radius:99px;background:#fff;font-size:13px;cursor:pointer}
 .tog input{width:18px;height:18px;accent-color:var(--xl);margin:0}
 .fx{display:flex;align-items:center;border-bottom:1px solid var(--grid);font-size:13px;min-height:32px}
 .fx i{font-style:italic;font-family:Georgia,serif;color:var(--mute);padding:0 10px;border-right:1px solid var(--grid);align-self:stretch;display:flex;align-items:center}
@@ -63,16 +63,19 @@ tr.playing .play{background:var(--xl);color:#fff;border-color:var(--xl)}
 .pane{padding:10px 12px;font-size:13px}.pane label{display:flex;align-items:center;gap:8px;min-height:36px}.pane input{width:18px;height:18px;accent-color:var(--xl)}
 .legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;margin:6px 0}.legend span::before{content:"";display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:5px;vertical-align:-1px;background:var(--c)}
 .note{color:var(--mute);font-size:12px;padding:10px 12px}
-.player{position:fixed;left:0;right:0;bottom:44px;background:#fff;border-top:2px solid var(--xl);display:none;align-items:center;gap:10px;padding:6px 10px;z-index:1000;box-shadow:0 -2px 8px rgba(0,0,0,.08)}
+.player{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:2px solid var(--xl);display:none;align-items:center;gap:10px;padding:6px 10px;z-index:1000;box-shadow:0 -2px 8px rgba(0,0,0,.08)}
 .player.show{display:flex}.player .what{flex:1;font-size:13px;overflow:hidden}.player .what b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .player .what span{color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
 .player button{height:36px}
-.tabs{position:fixed;left:0;right:0;bottom:0;height:44px;background:var(--head);border-top:1px solid var(--grid);display:flex;align-items:stretch;gap:2px;padding:0 6px;z-index:1001}
-.tabs button{height:auto;border:0;border-radius:0;background:transparent;color:var(--mute);padding:0 16px;font-size:13px;border-bottom:3px solid transparent}
-.tabs button[aria-selected=true]{background:#fff;color:var(--xl);font-weight:700;border-bottom-color:var(--xl)}
+.tabs{display:flex;gap:8px;padding:4px 14px 8px;max-width:1100px;margin:auto}
+.tabs button{border-radius:99px;font-weight:600;height:38px}
+.tabs button[aria-selected=true]{background:#111;color:#fff;border-color:#111}
+.logl{display:flex;flex-direction:column;gap:6px;padding:6px 14px 10px;max-width:1100px;margin:auto}
+.lr{display:grid;grid-template-columns:62px 52px minmax(0,1fr);gap:10px;align-items:center;padding:8px 10px;border:1px solid #e6e8ec;border-left:4px solid var(--g,#9aa3ad);border-radius:10px;background:#fff}
+.lr .tm{font-size:12px;color:var(--mute)}.lr .fq{font-weight:800}.lr .t{font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.lr .a{font-size:12.5px;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 a{color:var(--xl)}
 </style></head><body>
-<div class="title"><b>Radio Near Me</b><span id="where">Loading…</span></div>
+<div class="title"><b>Radio near me</b><span id="where">Loading…</span></div>
 <form class="tools" id="f">
 <input type="search" id="q" placeholder="City, ZIP or address" autocomplete="off" enterkeyhint="search">
 <button class="go" type="submit">Find</button><button type="button" id="loc">Use my location</button>
@@ -81,6 +84,7 @@ a{color:var(--xl)}
 <select id="genre" aria-label="Genre"><option value="">All genres</option></select>
 <span class="muted" id="count"></span>
 </form>
+<nav class="tabs" role="tablist"><button role="tab" data-s="sStations" aria-selected="true">Stations</button><button role="tab" data-s="sMap" aria-selected="false">Map</button><button role="tab" data-s="sLog" aria-selected="false">Song log</button></nav>
 <section class="sheet show" id="sStations">
 <div class="list" id="rows"><div class="msg">Loading stations…</div></div>
 <p class="note">The colored tile shows the type of music playing; tan means an ad, DJ or news break; gray means no info. Signal bars are an estimate from each tower's power and height in FCC records; hills, buildings and weather change it. Song info comes from iHeartRadio, the stations' own streams and TuneIn; genres from Apple's music catalog. Something look wrong? Open /debug?freq=95.5 (any frequency) and send a screenshot.</p>
@@ -100,15 +104,12 @@ a{color:var(--xl)}
 <section class="sheet" id="sLog">
 <div class="tools"><select id="logSt" aria-label="Station"><option value="">All Austin stations</option></select>
 <label class="tog"><input type="checkbox" id="logMusic"> Songs only</label>
-<a id="dl" href="/log.csv"><button type="button">Download CSV</button></a><span class="muted">Austin / San Marcos stations, saved all day</span></div>
-<div class="wrap"><table><thead>
-<tr class="letters"><th class="rn"></th><th>A</th><th>B</th><th>C</th><th>D</th><th>E</th><th>F</th></tr>
-<tr class="names"><th class="rn"></th><th>Time</th><th>FM</th><th>Station</th><th>On air</th><th>Song</th><th>Artist</th></tr>
-</thead><tbody id="logRows"></tbody></table></div>
+<a id="dl" href="/log.csv"><button type="button">Download CSV</button></a><span class="muted">Every song the Austin / San Marcos stations played, saved all day</span></div>
+<div class="logl" id="logRows"></div>
 </section>
 
 <div class="player" id="player"><button id="pBtn" aria-label="Play or pause">❚❚</button><div class="what"><b id="pName"></b><span id="pNow"></span></div><button id="pStop">Stop</button></div>
-<nav class="tabs" role="tablist"><button role="tab" data-s="sStations" aria-selected="true">Stations</button><button role="tab" data-s="sMap" aria-selected="false">Map</button><button role="tab" data-s="sLog" aria-selected="false">Austin log</button></nav>
+
 <audio id="audio" preload="none"></audio>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -186,7 +187,7 @@ async function go(lat,lon,label){
 async function loadPlaying(){
   clearTimeout(npTimer);
   const want=stations.filter(s=>s.sig.r<=2.3&&!s.blockedBy).sort((a,b)=>a.sig.r-b.sig.r).slice(0,42),b=[];
-  for(let i=0;i<want.length;i+=6)b.push(want.slice(i,i+6));
+  for(let i=0;i<want.length;i+=4)b.push(want.slice(i,i+4));
   await Promise.all(b.map(async g=>{try{const d=await api("/api/playing",g.map(info));for(const r of d)np[r.call+"|"+r.freq]=r;render();if(sel)setFx(sel)}catch(e){}}));
   npTimer=setTimeout(loadPlaying,60000);
 }
@@ -250,18 +251,19 @@ async function loadLog(){
   const f=$("logSt").value;$("dl").href="/log.csv"+(f?"?freq="+encodeURIComponent(f):"");
   try{let rows=await api("/api/log?limit=400"+(f?"&freq="+encodeURIComponent(f):""));
     if($("logMusic").checked)rows=rows.filter(r=>r.status==="SONG");
-    $("logRows").innerHTML=rows.length?rows.map((r,i)=>'<tr><td class="rn">'+(i+1)+'</td><td class="num">'+esc(new Date(r.t*1000).toLocaleString([], {month:"short",day:"numeric",hour:"numeric",minute:"2-digit"}))+'</td><td class="num">'+esc(r.freq)+'</td><td>'+esc(r.station)+'</td><td class="st '+cls(r.status)+'">'+esc(r.status)+'</td><td class="song">'+esc(r.title)+'</td><td class="art">'+esc(r.artist)+'</td></tr>').join(""):'<tr class="empty"><td class="rn">1</td><td colspan="6">Nothing logged yet. It fills in every few minutes.</td></tr>';
-  }catch(e){$("logRows").innerHTML='<tr class="empty"><td class="rn">1</td><td colspan="6">'+esc(e.message)+'</td></tr>'}
+    const tm=t=>new Date(t*1000).toLocaleString([], {hour:"numeric",minute:"2-digit"});
+    $("logRows").innerHTML=rows.length?rows.map(r=>'<div class="lr" style="--g:'+(r.status==="SONG"?"#217346":r.status==="NO DATA"?"#9aa3ad":"#b08968")+'"><span class="tm">'+esc(tm(r.t))+'</span><span class="fq">'+esc(r.freq)+'</span><div><div class="t">'+esc(r.status==="SONG"?r.title:"Ad / DJ / news")+'</div><div class="a">'+esc(r.status==="SONG"?r.artist+" · ":"")+esc(r.station)+'</div></div></div>').join(""):'<div class="msg">Nothing logged yet. It fills in every few minutes.</div>';
+  }catch(e){$("logRows").innerHTML='<div class="msg">'+esc(e.message)+'</div>'}
 }
 
 // ---------- Tabs & events ----------
 function tab(id){document.querySelectorAll(".sheet").forEach(x=>x.classList.toggle("show",x.id===id));
-  document.querySelectorAll(".tabs button").forEach(b=>b.setAttribute("aria-selected",b.dataset.s===id));
+  document.querySelectorAll("nav.tabs button").forEach(b=>b.setAttribute("aria-selected",b.dataset.s===id));
   $("f").style.display=id==="sLog"?"none":"";
   if(id==="sMap"){initMap();setTimeout(()=>{if(map){map.invalidateSize();if(here)map.panTo([here.lat,here.lon])}},50)}
   if(id==="sLog")loadLog();
   try{history.replaceState(null,"",id==="sLog"?"#log":id==="sMap"?"#map":"#")}catch(e){}}
-document.querySelector(".tabs").onclick=e=>{const b=e.target.closest("button");if(b)tab(b.dataset.s)};
+document.querySelector("nav.tabs").onclick=e=>{const b=e.target.closest("button");if(b)tab(b.dataset.s)};
 $("rows").onclick=e=>{const tr=e.target.closest(".b[data-k]");if(!tr)return;const s=stations.find(x=>key(x)===tr.dataset.k);if(!s)return;
   if(e.target.closest("[data-play]"))playStation(s);else select(s)};
 $("f").onsubmit=async e=>{e.preventDefault();const q=$("q").value.trim();if(!q)return;$("where").textContent="Finding "+q+"…";

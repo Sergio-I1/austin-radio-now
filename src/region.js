@@ -98,7 +98,7 @@ export async function nearby(lat, lon, radiusKm = 160) {
 }
 
 // ---------------------------------------------------------------------------
-// Now playing for a batch of stations (max 6 per request, to stay inside
+// Now playing for a batch of stations (max 4 per request, to stay inside
 // Cloudflare's free-plan limit of 50 outgoing requests per visit)
 // ---------------------------------------------------------------------------
 const IHEART_OWNER = /ihm|iheart|citicasters|capstar|clear channel/i;
@@ -116,7 +116,7 @@ export function toStation(s) {
 }
 
 export async function playing(list) {
-  return Promise.all(list.slice(0, 6).map(async (s) => {
+  return Promise.all(list.slice(0, 4).map(async (s) => {
     const st = toStation(s);
     const key = `np:${st.call}|${st.freq}`;
     const hit = cached(key, 30000); if (hit) return hit;

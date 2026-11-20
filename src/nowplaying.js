@@ -134,6 +134,7 @@ export async function streamsFor(st) {
       }
     } catch {}
   }
+  if (!urls.length) { try { urls.push(...await radioBrowserStreams(st)); } catch {} }
   const out = [...new Set(urls)];
   return out.length ? store(key, out) : out;
 }
@@ -180,12 +181,48 @@ async function tritonNow(url, st) {
   for (const mount of [...new Set([seg, seg.replace(/AAC$/i, "")])]) {
     if (!mount) continue;
     const xml = await getText(`https://np.tritondigital.com/public/nowplaying?mountName=${encodeURIComponent(mount)}&numberToFetch=1&eventType=track`);
-    if (!/nowplaying-info/.test(xml)) continue;
+    if (!/<nowplaying-info[\s>]/.test(xml)) continue;
     const t = parseTriton(xml);
     if (t.start && t.dur && Date.now() > t.start + t.dur + 60000) return R(BREAK, "", "", "Station stream", `Ad, DJ or news (last song: ${t.artist} - ${t.song})`);
     return R(classify(t.artist, t.song, st), t.artist, t.song, "Station stream");
   }
   return null;
+}
+
+// Many stations (Audacy, Cumulus, Waterloo, public radio...) stream through
+// Triton Digital, whose mount names usually follow the call letters. Try the
+// common patterns and remember which one works.
+async function tritonGuess(st) {
+  const base = st.call.split("-")[0].toUpperCase();
+  const key = "tmount:" + base;
+  let mounts = cached(key, 12 * 36e5);
+  if (mounts === null) return null;
+  mounts = mounts ? [mounts] : [`${base}FM`, `${base}FMAAC`, base, `${base}AAC`];
+  for (const m of mounts) {
+    const xml = await getText(`https://np.tritondigital.com/public/nowplaying?mountName=${m}&numberToFetch=1&eventType=track`, 6000);
+    if (!/<nowplaying-info[\s>]/.test(xml)) continue;
+    store(key, m);
+    const t = parseTriton(xml);
+    if (t.start && t.dur && Date.now() > t.start + t.dur + 60000) return R(BREAK, "", "", "Station stream", `Ad, DJ or news (last song: ${t.artist} - ${t.song})`);
+    return R(classify(t.artist, t.song, st), t.artist, t.song, "Station stream");
+  }
+  store(key, null);
+  return null;
+}
+
+// Radio Browser (community station directory) - backup source of stream links
+async function radioBrowserStreams(st) {
+  const base = st.call.split("-")[0];
+  const out = [];
+  for (const q of [base, st.tunein && st.tunein.replace(base, "").trim()].filter(Boolean)) {
+    const d = await getJSON(`https://all.api.radio-browser.info/json/stations/search?countrycode=US&hidebroken=true&limit=10&name=${encodeURIComponent(q)}`);
+    for (const x of d || []) {
+      const t = `${x.name} ${x.homepage} ${x.tags}`.toLowerCase();
+      if ((t.includes(base.toLowerCase()) || t.includes(st.freq)) && x.url_resolved) out.push(x.url_resolved);
+    }
+    if (out.length) break;
+  }
+  return out;
 }
 
 async function streamNow(st) {
@@ -214,7 +251,7 @@ export async function checkStation(st) {
 async function checkSources(st) {
   const errors = [];
   let best = null;
-  for (const fn of [iheartNow, streamNow, tuneinNow]) {
+  for (const fn of [iheartNow, tritonGuess, streamNow, tuneinNow]) {
     try {
       const r = await fn(st);
       if (!r) continue;
@@ -242,7 +279,7 @@ export async function songGenre(artist, title) {
 // For troubleshooting one station: what every source says, and its stream links
 export async function debugStation(st) {
   const out = { station: st, sources: {} };
-  for (const fn of [iheartNow, streamNow, tuneinNow]) {
+  for (const fn of [iheartNow, tritonGuess, streamNow, tuneinNow]) {
     try { out.sources[fn.name] = (await fn(st)) || "no answer"; }
     catch (e) { out.sources[fn.name] = "error: " + e.message; }
   }
