@@ -140,7 +140,7 @@ async function api(path,body){const r=await fetch(path,body?{method:"POST",heade
 function visible(){
   const far=$("showFar").checked,mo=$("musicOnly").checked,g=$("genre").value;
   return stations.filter(s=>{const n=np[key(s)];
-    if(!far&&s.sig.bars===0&&s.sig.r>2.3)return false;
+    if(!far&&s.sig.bars===0&&s.sig.r>2.3)return false;if(!far&&s.blockedBy)return false;
     if(mo&&n?.status!=="SONG")return false;
     if(g&&n?.genre!==g)return false;return true});
 }
