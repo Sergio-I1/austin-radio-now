@@ -1,6 +1,7 @@
 name = "austin-radio-now"
 main = "src/worker.js"
 compatibility_date = "2025-09-01"
+workers_dev = true
 
 # Check every station once a minute (and save changes to the log, once the database is connected)
 [triggers]
