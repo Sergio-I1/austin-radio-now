@@ -4,15 +4,15 @@ A live board showing what's playing on Austin and San Marcos FM radio (88.7 to 1
 
 It runs for free on Cloudflare Workers, so you can open it from your phone anywhere. No laptop has to stay on.
 
-## Two pages
+## What's on the site
 
-- **`/` - Radio near me.** Type a city, ZIP or address, or tap **Use my location**. It finds every FM tower near you (from the FCC's station database), estimates how well you can hear each one, and shows what's playing with the song's genre (Pop, Country, Hip-Hop/Rap...). Tap a genre to filter.
-  - **Map tab** shows the towers, colored by how strong they are where you are.
-  - **Advanced: signal zones** draws rings for a station: strong, good, weak, fading, and gone. It can also show where the same frequency turns into a different station, and **Follow me while driving** updates everything as you move.
-  - The rings are estimates from each tower's power and antenna height (fitted to the FCC's station-class distances). Hills, buildings, directional antennas and the weather aren't included.
-- **`/austin` - Austin live board + song log.** The fixed Austin / San Marcos station list below, checked every minute, with a downloadable log.
+One white, spreadsheet-style page with three sheet tabs at the bottom:
 
-Built with help from Claude (Anthropic's AI assistant).
+- **Stations.** Type a city, ZIP or address, or tap **Use my location**. Every FM station you can pick up there, one row each: what's on (SONG / AD / TALK), song, artist, genre (Pop, Country, Holiday...), estimated signal where you are, and distance. Tap **▶** to listen to the station live on the page. Switches: **Music only** hides stations that are on an ad, DJ or news break; **Far stations** shows ones too far to hear; plus a genre filter.
+- **Map.** Towers colored by how strong they are where you are. **Advanced: signal zones** draws strong / good / weak / fading / gone rings for a station, shows where the same frequency turns into a different station, and can follow you while you drive.
+- **Austin log.** Everything the Austin / San Marcos stations played, saved all day (checked every few minutes), downloadable as a CSV spreadsheet.
+
+The rings are estimates from each tower's power and antenna height (fitted to the FCC's station-class distances). Hills, buildings, directional antennas and the weather aren't included.
 
 ## Stations
 
@@ -41,10 +41,12 @@ To add or remove a station, edit the `STATIONS` list at the top of `src/worker.j
 - **The page** (`/`) shows the live board and refreshes itself every 30 seconds. The **Log** tab shows recent changes and lets you filter by station.
 - `/log.csv` downloads the log as a spreadsheet, using Austin time. The log keeps the last 30 days.
 
-Where the song info comes from, tried in this order (song genres come from Apple's public iTunes search, and station locations from the FCC FM Query):
-1. **iHeartRadio's live data**, for Kiss FM, KVET and KASE. It's exact and knows when an ad break is on.
-2. **The "now playing" tag inside the station's audio stream**, for KUTX.
-3. **TuneIn's station directory**, which lists the current song for most stations. Here "AD / TALK" means no song is listed right now, so it's a close guess.
+Where the song info comes from, tried in this order:
+1. **iHeartRadio's live data** for iHeart stations (Kiss FM, KVET, KASE...). It's exact and knows when an ad break is on.
+2. **The station's own audio stream**: the "now playing" tag sent inside the stream, or Triton Digital's now-playing feed for stations streamed through StreamTheWorld (like Majic 95.5). This is what's on air right now.
+3. **TuneIn's station directory**, as a last resort. It sometimes lags.
+
+Song genres come from Apple's public iTunes search, and station locations, power and antenna height from the FCC FM Query.
 
 These are public but unofficial sources, so a station may show **NO DATA** if one of them changes.
 

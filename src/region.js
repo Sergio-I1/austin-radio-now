@@ -1,7 +1,7 @@
 // Region search: turn a typed place into coordinates, find nearby FM towers
 // from the FCC's FM Query (LMS data), and check what they're playing.
 
-import { UA, SONG, checkStation, songGenre } from "./nowplaying.js";
+import { UA, SONG, checkStation, songGenre, streamsFor } from "./nowplaying.js";
 
 const memo = new Map(); // simple in-memory cache: key -> { at, data }
 function cached(key, ms) { const c = memo.get(key); return c && Date.now() - c.at < ms ? c.data : undefined; }
@@ -98,23 +98,52 @@ export async function nearby(lat, lon, radiusKm = 160) {
 }
 
 // ---------------------------------------------------------------------------
-// Now playing for a batch of stations (max 8 per request to stay inside
-// Cloudflare's free-plan limit on outgoing requests)
+// Now playing for a batch of stations (max 6 per request, to stay inside
+// Cloudflare's free-plan limit of 50 outgoing requests per visit)
 // ---------------------------------------------------------------------------
 const IHEART_OWNER = /ihm|iheart|citicasters|capstar|clear channel/i;
 
+export function toStation(s) {
+  const call = String(s.call || "").toUpperCase().slice(0, 12);
+  const freq = String(s.freq || "").slice(0, 6);
+  const http = (u) => (typeof u === "string" && /^https?:\/\//.test(u) ? u : undefined);
+  return {
+    call, freq, name: "", place: String(s.city || "").slice(0, 40),
+    iheart: s.iheart ? String(s.iheart).slice(0, 12) : IHEART_OWNER.test(s.licensee || "") ? (call.includes("-") ? call : `${call}-FM`) : undefined,
+    tunein: s.tunein ? String(s.tunein).slice(0, 60) : s.serv === "FX" ? `${freq} ${s.city || ""}` : `${call.split("-")[0]} ${freq}`,
+    icy: http(s.icy),
+  };
+}
+
 export async function playing(list) {
-  return Promise.all(list.slice(0, 8).map(async (s) => {
-    const key = `np:${s.call}|${s.freq}`;
+  return Promise.all(list.slice(0, 6).map(async (s) => {
+    const st = toStation(s);
+    const key = `np:${st.call}|${st.freq}`;
     const hit = cached(key, 30000); if (hit) return hit;
-    const call = String(s.call || "").toUpperCase().slice(0, 12);
-    const st = {
-      call, freq: String(s.freq), name: "", place: s.city || "",
-      iheart: IHEART_OWNER.test(s.licensee || "") ? (call.includes("-") ? call : `${call}-FM`) : undefined,
-      tunein: s.serv === "FX" ? `${s.freq} ${s.city || ""}` : `${call.split("-")[0]} ${s.freq}`,
-    };
     const r = await checkStation(st);
     r.genre = r.status === SONG ? await songGenre(r.artist, r.title) : "";
     return store(key, { call: s.call, freq: s.freq, ...r });
   }));
+}
+
+// Stream links to listen to a station on the page. Plain-http streams are
+// passed through /api/stream so the browser will play them on an https page.
+export async function listen(s) {
+  const urls = await streamsFor(toStation(s));
+  return urls.map((u) => ({
+    url: u.startsWith("https://") ? u : `/api/stream?u=${encodeURIComponent(u)}`,
+    hls: /\.m3u8(\?|$)/i.test(u),
+  })).sort((a, b) => a.hls - b.hls);
+}
+
+export async function proxyStream(u, request) {
+  let url;
+  try { url = new URL(u); } catch { return new Response("Bad link", { status: 400 }); }
+  if (url.protocol !== "http:" || /^(localhost|127\.|10\.|192\.168\.|169\.254\.|172\.(1[6-9]|2\d|3[01])\.)/.test(url.hostname)) {
+    return new Response("Not allowed", { status: 403 });
+  }
+  const r = await fetch(url, { headers: { "User-Agent": UA, ...(request.headers.get("range") ? { range: request.headers.get("range") } : {}) } });
+  const type = r.headers.get("content-type") || "";
+  if (!/audio|octet-stream|mpegurl|aac|mpeg/i.test(type)) { await r.body?.cancel(); return new Response("Not an audio stream", { status: 415 }); }
+  return new Response(r.body, { status: r.status, headers: { "content-type": type, "cache-control": "no-store" } });
 }

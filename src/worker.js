@@ -1,21 +1,23 @@
 // Austin Radio Now - Cloudflare Worker
 //
-//   /              Radio near me: type a place or use your location, see nearby
-//                  stations, what they're playing, genre, signal and a zone map
-//   /austin        Austin / San Marcos live board + song log
-//   /api/now       Austin live data (JSON)          /api/log   Austin log (JSON)
-//   /log.csv       Austin log as a spreadsheet file
-//   /api/geocode?q=   /api/reverse?lat&lon   /api/nearby?lat&lon   POST /api/playing
+//   /                 The radio sheet: stations near any place (or your location),
+//                     what's playing, genre, signal, a map, a player, and the Austin log
+//   /austin           Opens the sheet on the Austin log tab
+//   /log.csv          Austin log as a spreadsheet file
+//   /api/geocode?q=   /api/reverse?lat&lon   /api/nearby?lat&lon
+//   POST /api/playing (now playing for up to 6 stations)
+//   POST /api/listen  (stream links for one station)
+//   /api/stream?u=    (passes plain-http radio streams through, so phones will play them)
+//   /api/log          Austin log (JSON)
 //
-// A cron trigger checks the Austin stations every minute and saves changes
-// to a D1 database (binding: DB).
+// A cron trigger checks the Austin stations (a third each minute) and saves
+// every change to a D1 database (binding: DB).
 
-import { KEEP_DAYS, runCheck, liveSnapshot, readLog, fmtTime, csvCell, AUSTIN_PAGE } from "./austin.js";
-import { geocode, reverse, nearby, playing } from "./region.js";
-import { REGION_PAGE } from "./regionPage.js";
+import { KEEP_DAYS, STATIONS, runCheck, readLog, fmtTime, csvCell } from "./austin.js";
+import { geocode, reverse, nearby, playing, listen, proxyStream } from "./region.js";
+import { PAGE } from "./page.js";
 
 const json = (d, status = 200) => new Response(JSON.stringify(d), { status, headers: { "content-type": "application/json", "cache-control": "no-store" } });
-const html = (s) => new Response(s, { headers: { "content-type": "text/html; charset=utf-8" } });
 
 function coords(url) {
   const lat = parseFloat(url.searchParams.get("lat")), lon = parseFloat(url.searchParams.get("lon"));
@@ -23,14 +25,17 @@ function coords(url) {
   return [lat, lon];
 }
 
+// The Austin list, shared with the page so its rows can be played too
+const AUSTIN = JSON.stringify(STATIONS.map(({ freq, call, name, fmt, tunein, iheart, icy }) => ({ freq, call, name, fmt, tunein, iheart, icy })));
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     try {
       switch (url.pathname) {
-        case "/": return html(REGION_PAGE);
-        case "/austin": return html(AUSTIN_PAGE);
-        case "/api/now": return json(await liveSnapshot(env));
+        case "/":
+          return new Response(PAGE.replace("__AUSTIN__", AUSTIN.replace(/</g, "\\u003c")), { headers: { "content-type": "text/html; charset=utf-8" } });
+        case "/austin": return Response.redirect(new URL("/#log", url).toString(), 302);
         case "/api/log": return json(await readLog(env, url));
         case "/log.csv": {
           if (!url.searchParams.get("limit")) url.searchParams.set("limit", "5000");
@@ -51,6 +56,11 @@ export default {
           if (!Array.isArray(list)) return json({ error: "Expected a list" }, 400);
           return json(await playing(list));
         }
+        case "/api/listen": {
+          if (request.method !== "POST") return json({ error: "Use POST" }, 405);
+          return json({ streams: await listen(await request.json()) });
+        }
+        case "/api/stream": return proxyStream(url.searchParams.get("u") || "", request);
         default: return new Response("Not found", { status: 404 });
       }
     } catch (e) {
@@ -60,8 +70,9 @@ export default {
 
   async scheduled(event, env, ctx) {
     ctx.waitUntil((async () => {
-      await runCheck(env);
-      if (env.DB && new Date().getUTCMinutes() === 0) {
+      const minute = new Date(event.scheduledTime || Date.now()).getUTCMinutes();
+      await runCheck(env, minute % 3);
+      if (env.DB && minute === 0) {
         await env.DB.prepare("DELETE FROM plays WHERE t < ?").bind(Math.floor(Date.now() / 1000) - KEEP_DAYS * 86400).run();
       }
     })());
