@@ -1,7 +1,7 @@
 // The radio sheet (served at /). A spreadsheet-style page with three sheet
 // tabs: Stations, Map and Austin log. __AUSTIN__ is filled in by the worker.
 export const PAGE = `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1"><title>Radio Sheet</title>
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>Radio Near Me</title>
 <meta name="theme-color" content="#217346"><meta name="color-scheme" content="light">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
@@ -12,18 +12,22 @@ body{padding-bottom:104px}
 .title{background:var(--xl);color:#fff;padding:10px 12px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
 .title b{font-size:17px}.title span{font-size:13px;opacity:.9}
 .tools{background:var(--head);border-bottom:1px solid var(--grid);padding:6px 8px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
-.list{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:6px;padding:8px}
-.b{display:grid;grid-template-columns:50px minmax(0,1fr) auto;align-items:center;gap:8px;padding:6px 8px 6px 10px;border:1px solid var(--grid);border-left:4px solid var(--s0);border-radius:10px;background:#fff;min-height:52px;cursor:pointer}
-.b.SONG{border-left-color:var(--songT)}.b.AD{border-left-color:#e07b2e}.b.NO{border-left-color:#c9c9c9}
-.b.on{background:var(--sel);border-color:#9cc9ad}.b.far{opacity:.55}
-.b .f{font-weight:800;font-size:17px;line-height:1.05;font-variant-numeric:tabular-nums}.b .f small{display:block;font-weight:500;font-size:10.5px;color:var(--mute);letter-spacing:.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.b .m{overflow:hidden}.b .t{font-weight:650;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.b .a{font-size:12.5px;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.b .r{display:flex;align-items:center;gap:6px}
-.gtag{font-size:11px;padding:1px 7px;border-radius:99px;background:#eef3ef;color:var(--xl2);white-space:nowrap;max-width:84px;overflow:hidden;text-overflow:ellipsis}
-.b .play{width:36px;height:36px;border-radius:50%}
-.b.playing .play{background:var(--xl);color:#fff;border-color:var(--xl)}
-.sec{grid-column:1/-1;font-size:12px;color:var(--mute);padding:6px 2px 0}
+.list{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:8px;padding:10px;background:#eef1f4}
+.b{display:grid;grid-template-columns:64px minmax(0,1fr) auto;align-items:stretch;gap:10px;padding:6px;border-radius:14px;background:#fff;box-shadow:0 1px 2px rgba(16,24,40,.08),0 1px 6px rgba(16,24,40,.06);cursor:pointer;border:2px solid transparent;--g:#9aa3ad}
+.b.on{border-color:var(--g)}.b.far{opacity:.6}
+.b .f{background:var(--g);color:#fff;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4px 2px;min-height:58px}
+.b .f b{font-size:21px;font-weight:800;line-height:1;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.b .f small{font-size:9.5px;opacity:.85;margin-top:3px;letter-spacing:.03em}
+.b .m{overflow:hidden;display:flex;flex-direction:column;justify-content:center;gap:1px}
+.gtag{align-self:flex-start;font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;padding:2px 8px;border-radius:99px;background:color-mix(in srgb,var(--g) 16%,#fff);color:color-mix(in srgb,var(--g) 80%,#000);white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+.b .t{font-weight:750;font-size:16px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#111}
+.b .t.dim{font-weight:600;font-size:14px;color:var(--mute)}
+.b .a{font-size:12.5px;color:#4b5563;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.b .a i{font-style:normal;color:#9aa3ad;font-size:11px}
+.b .r{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding-right:2px}
+.b .play{width:38px;height:38px;border-radius:50%;border:0;background:color-mix(in srgb,var(--g) 14%,#fff);color:color-mix(in srgb,var(--g) 85%,#000);font-size:13px}
+.b.playing .play{background:var(--g);color:#fff}
+.sec{grid-column:1/-1;font-size:12px;font-weight:600;color:var(--mute);padding:8px 2px 0}
 .msg{grid-column:1/-1;padding:14px;color:var(--mute)}
 .tools input[type=search],.tools select{font:inherit;font-size:16px;height:36px;padding:0 10px;border:1px solid #c8c8c8;border-radius:4px;background:#fff;color:var(--ink)}
 .tools input[type=search]{flex:1 1 180px}
@@ -68,7 +72,7 @@ tr.playing .play{background:var(--xl);color:#fff;border-color:var(--xl)}
 .tabs button[aria-selected=true]{background:#fff;color:var(--xl);font-weight:700;border-bottom-color:var(--xl)}
 a{color:var(--xl)}
 </style></head><body>
-<div class="title"><b>Radio Sheet</b><span id="where">Loading…</span></div>
+<div class="title"><b>Radio Near Me</b><span id="where">Loading…</span></div>
 <form class="tools" id="f">
 <input type="search" id="q" placeholder="City, ZIP or address" autocomplete="off" enterkeyhint="search">
 <button class="go" type="submit">Find</button><button type="button" id="loc">Use my location</button>
@@ -79,7 +83,7 @@ a{color:var(--xl)}
 </form>
 <section class="sheet show" id="sStations">
 <div class="list" id="rows"><div class="msg">Loading stations…</div></div>
-<p class="note">Green edge = song playing, orange = ad / DJ / news, gray = no info. Signal bars are an estimate from each tower's power and height in FCC records; hills, buildings and weather change it. Song info comes from iHeartRadio, the stations' own streams and TuneIn; genres from Apple's music catalog. Something look wrong? Open /debug?freq=95.5 (any frequency) and send a screenshot.</p>
+<p class="note">The colored tile shows the type of music playing; tan means an ad, DJ or news break; gray means no info. Signal bars are an estimate from each tower's power and height in FCC records; hills, buildings and weather change it. Song info comes from iHeartRadio, the stations' own streams and TuneIn; genres from Apple's music catalog. Something look wrong? Open /debug?freq=95.5 (any frequency) and send a screenshot.</p>
 </section>
 
 <section class="sheet" id="sMap">
@@ -142,25 +146,29 @@ function visible(){
 function render(){
   if(!here)return;
   const gs=[...new Set(Object.values(np).map(n=>n.genre).filter(Boolean))].sort(),cur=$("genre").value;
-  $("genre").innerHTML='<option value="">All genres</option>'+gs.map(g=>'<option'+(g===cur?" selected":"")+'>'+esc(g)+'</option>').join("");
+  $("genre").innerHTML='<option value="">All genres</option>'+gs.map(g=>'<option value="'+esc(g)+'"'+(g===cur?" selected":"")+'>'+esc(genreInfo(g).label)+'</option>').join("");
   const list=visible(),hear=list.filter(s=>s.sig.bars>0),far=list.filter(s=>s.sig.bars===0);
   $("count").textContent=list.length+" shown";
   $("rows").innerHTML=list.length?hear.map(bubble).join("")+(far.length?'<div class="sec">Probably too far to hear</div>'+far.map(bubble).join(""):""):
     '<div class="msg">'+($("musicOnly").checked?"No music found right now. Turn off “Music only” to see everything.":"No stations match.")+'</div>';
 }
+const GENRE=[[/holiday|christmas/i,"#c8102e","Christmas"],[/pop/i,"#e0457b"],[/country/i,"#c27a12"],[/hip-hop|rap/i,"#7b3fe4"],[/r&b|soul/i,"#a23b72"],[/latin|mexican|tejano|reggaeton/i,"#e8590c"],
+ [/alternative|indie/i,"#0f8b8d"],[/rock|metal/i,"#3f4a5a"],[/christian|gospel/i,"#1c7ed6"],[/classical|soundtrack/i,"#8c6d46"],[/dance|electronic/i,"#0ca5c9"],[/jazz|blues/i,"#364fc7"],[/singer|folk|americana/i,"#5c940d"]];
+function genreInfo(g){for(const [re,c,label] of GENRE)if(re.test(g))return {c,label:label||g};return {c:"#217346",label:g}}
 function bubble(s){
-  const n=np[key(s)],g=s.sig,k=key(s),c=n?cls(n.status):"NO";
+  const n=np[key(s)],g=s.sig,k=key(s);
   const bars='<span class="bars" title="'+esc(g.label)+'">'+[1,2,3,4].map(b=>'<i style="background:'+(b<=g.bars?"var("+g.c+")":"")+'"></i>').join("")+'</span>';
   const name=n?.stationName||s.call;
-  let t,a;
-  if(!n){t='<span class="muted">Checking…</span>';a=esc(name)}
-  else if(n.status==="SONG"){t=esc(n.title);a=esc(n.artist)+' · <span title="'+esc(name)+'">'+esc(name)+'</span>'}
-  else{t='<span class="muted">'+(n.status==="NO DATA"?"No song info":"Ad / DJ / news")+'</span>';a=esc(name)}
-  return '<div class="b '+c+(sel&&key(sel)===k?" on":"")+(playingKey===k?" playing":"")+(g.bars===0?" far":"")+'" data-k="'+esc(k)+'">'+
-    '<div class="f">'+esc(s.freq)+'<small>'+esc(s.call)+'</small></div>'+
-    '<div class="m"><div class="t">'+t+'</div><div class="a">'+a+(s.blockedBy?' · blocked by '+esc(s.blockedBy.call):'')+'</div></div>'+
-    '<div class="r">'+(n?.genre?'<span class="gtag">'+esc(n.genre)+'</span>':'')+bars+
-    '<button class="play" data-play="'+esc(k)+'" aria-label="Listen to '+esc(s.freq)+'">'+(playingKey===k?"■":"▶")+'</button></div></div>';
+  let color="#9aa3ad",tag="",t,a;
+  if(!n){t='<div class="t dim">Checking…</div>';a='<i>'+esc(name)+'</i>'}
+  else if(n.status==="SONG"){const gi=n.genre?genreInfo(n.genre):{c:"#217346",label:"Music"};color=gi.c;tag=gi.label;
+    t='<div class="t">'+esc(n.title)+'</div>';a=esc(n.artist)+' <i>· '+esc(name)+'</i>'}
+  else if(n.status==="NO DATA"){tag="No info";t='<div class="t dim">No song info</div>';a='<i>'+esc(name)+'</i>'}
+  else{color="#b08968";tag="Ad / DJ / news";t='<div class="t dim">Break, back soon</div>';a='<i>'+esc(name)+'</i>'}
+  return '<div class="b'+(sel&&key(sel)===k?" on":"")+(playingKey===k?" playing":"")+(g.bars===0?" far":"")+'" data-k="'+esc(k)+'" style="--g:'+color+'">'+
+    '<div class="f"><b>'+esc(s.freq)+'</b><small>'+esc(s.call.replace(/-FM$/,""))+'</small></div>'+
+    '<div class="m">'+(tag?'<span class="gtag">'+esc(tag)+'</span>':'')+t+'<div class="a">'+a+(s.blockedBy?' <i>· blocked by '+esc(s.blockedBy.call)+'</i>':'')+'</div></div>'+
+    '<div class="r"><button class="play" data-play="'+esc(k)+'" aria-label="Listen to '+esc(s.freq)+'">'+(playingKey===k?"■":"▶")+'</button>'+bars+'</div></div>';
 }
 function setFx(){}
 async function go(lat,lon,label){
